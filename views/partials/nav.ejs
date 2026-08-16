@@ -1,0 +1,16 @@
+<header class="topbar">
+  <div class="brand">🚗 דיווח קילומטראז' רכבי חברה</div>
+  <% if (user) { %>
+    <nav class="nav">
+      <span class="who"><%= user.firstName %> <%= user.lastName %> <span class="role-badge"><%= user.role === 'officer' ? 'קצין רכב' : 'עובד' %></span></span>
+      <% if (user.role === 'officer') { %>
+        <a href="/dashboard">מסך ראשי</a>
+      <% } else { %>
+        <a href="/my-reports">הדיווחים שלי</a>
+      <% } %>
+      <form action="/logout" method="POST" class="inline">
+        <button type="submit" class="link-btn">התנתקות</button>
+      </form>
+    </nav>
+  <% } %>
+</header>

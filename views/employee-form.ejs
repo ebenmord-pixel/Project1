@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <%- include('partials/head', { title: employee ? 'עריכת עובד' : 'הוספת עובד' }) %>
+</head>
+<body>
+  <%- include('partials/nav') %>
+  <main class="container narrow">
+    <h1><%= employee ? 'עריכת עובד' : 'הוספת עובד חדש' %></h1>
+    <% if (error) { %>
+      <div class="alert alert-error"><%= error %></div>
+    <% } %>
+    <form method="POST" action="<%= employee ? ('/employees/' + employee.id) : '/employees' %>" class="card">
+      <label>שם פרטי
+        <input type="text" name="firstName" value="<%= employee ? employee.firstName : '' %>" required>
+      </label>
+      <label>שם משפחה
+        <input type="text" name="lastName" value="<%= employee ? employee.lastName : '' %>" required>
+      </label>
+      <label>מספר רכב
+        <input type="text" name="vehicleNumber" value="<%= employee ? employee.vehicleNumber : '' %>" required>
+      </label>
+      <label>תחילת חוזה ליסינג
+        <input type="date" name="leaseStartDate" value="<%= employee ? employee.leaseStartDate : '' %>" required>
+      </label>
+      <label>שם משתמש (לכניסה למערכת)
+        <input type="text" name="username" value="<%= employee ? employee.username : '' %>" required>
+      </label>
+      <label>סיסמה <%= employee ? '(השאירו ריק כדי לא לשנות)' : '' %>
+        <input type="password" name="password" <%= employee ? '' : 'required' %>>
+      </label>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary"><%= employee ? 'שמירה' : 'הוספה' %></button>
+        <a href="/dashboard" class="btn btn-secondary">ביטול</a>
+      </div>
+    </form>
+  </main>
+</body>
+</html>

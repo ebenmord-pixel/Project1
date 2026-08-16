@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <%- include('partials/head', { title: 'הדיווחים שלי' }) %>
+</head>
+<body>
+  <%- include('partials/nav') %>
+  <main class="container">
+    <h1>שלום, <%= employee.firstName %> <%= employee.lastName %></h1>
+
+    <section class="card">
+      <h2>פרטי הרכב שלי</h2>
+      <p><strong>מספר רכב:</strong> <%= employee.vehicleNumber %> &nbsp;|&nbsp;
+         <strong>תחילת חוזה ליסינג:</strong> <%= employee.leaseStartDate %></p>
+    </section>
+
+    <section class="card">
+      <h2>דיווח קילומטראז' חדש</h2>
+      <% if (error) { %>
+        <div class="alert alert-error"><%= error %></div>
+      <% } %>
+      <form method="POST" action="/my-reports" class="form-row">
+        <label>תאריך
+          <input type="date" name="reportDate" value="<%= new Date().toISOString().slice(0,10) %>" required>
+        </label>
+        <label>קילומטראז' נוכחי
+          <input type="number" name="mileage" min="0" step="1" required>
+        </label>
+        <button type="submit" class="btn btn-primary">שליחת דיווח</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>היסטוריית דיווחים</h2>
+      <% if (reports.length === 0) { %>
+        <p class="empty-state">עדיין לא שלחת דיווחים.</p>
+      <% } else { %>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>תאריך הדיווח</th>
+                <th>מספר רכב</th>
+                <th>קילומטראז'</th>
+                <th>מועד שליחת הדיווח</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% reports.forEach(r => { %>
+                <tr>
+                  <td><%= r.reportDate %></td>
+                  <td><%= r.vehicleNumber %></td>
+                  <td><%= r.mileage.toLocaleString('he-IL') %> ק"מ</td>
+                  <td><%= new Date(r.createdAt).toLocaleString('he-IL') %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <%- include('partials/head', { title: 'מסך ראשי - קצין רכב' }) %>
+</head>
+<body>
+  <%- include('partials/nav') %>
+  <main class="container">
+    <div class="page-header">
+      <h1>מסך ראשי</h1>
+      <a href="/employees/new" class="btn btn-primary">+ הוספת עובד</a>
+    </div>
+
+    <section class="card">
+      <h2>פרטי עובדים ורכבים</h2>
+      <% if (employees.length === 0) { %>
+        <p class="empty-state">עדיין לא הוגדרו עובדים במערכת. לחצו על "הוספת עובד" כדי להתחיל.</p>
+      <% } else { %>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>שם פרטי</th>
+                <th>שם משפחה</th>
+                <th>מספר רכב</th>
+                <th>תחילת חוזה ליסינג</th>
+                <th>שם משתמש</th>
+                <th>פעולות</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% employees.forEach(emp => { %>
+                <tr>
+                  <td><%= emp.firstName %></td>
+                  <td><%= emp.lastName %></td>
+                  <td><%= emp.vehicleNumber %></td>
+                  <td><%= emp.leaseStartDate %></td>
+                  <td><%= emp.username %></td>
+                  <td class="actions">
+                    <a href="/employees/<%= emp.id %>/reports">דיווחים</a>
+                    <a href="/employees/<%= emp.id %>/edit">עריכה</a>
+                    <form action="/employees/<%= emp.id %>/delete" method="POST" class="inline"
+                          onsubmit="return confirm('למחוק את העובד <%= emp.firstName %> <%= emp.lastName %>?');">
+                      <button type="submit" class="link-btn danger">מחיקה</button>
+                    </form>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </section>
+
+    <section class="card">
+      <h2>דיווחי קילומטראז' אחרונים</h2>
+      <% if (reports.length === 0) { %>
+        <p class="empty-state">עדיין לא נשלחו דיווחים.</p>
+      <% } else { %>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>עובד</th>
+                <th>מספר רכב</th>
+                <th>תאריך הדיווח</th>
+                <th>קילומטראז'</th>
+                <th>מועד שליחת הדיווח</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% reports.forEach(r => { %>
+                <tr>
+                  <td><%= r.user ? (r.user.firstName + ' ' + r.user.lastName) : 'עובד שנמחק' %></td>
+                  <td><%= r.vehicleNumber %></td>
+                  <td><%= r.reportDate %></td>
+                  <td><%= r.mileage.toLocaleString('he-IL') %> ק"מ</td>
+                  <td><%= new Date(r.createdAt).toLocaleString('he-IL') %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </section>
+  </main>
+</body>
+</html>

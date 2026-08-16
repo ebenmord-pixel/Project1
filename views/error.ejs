@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <%- include('partials/head', { title: 'שגיאה' }) %>
+</head>
+<body>
+  <%- include('partials/nav') %>
+  <main class="container">
+    <div class="alert alert-error"><%= message %></div>
+    <a href="/" class="btn btn-secondary">חזרה לעמוד הראשי</a>
+  </main>
+</body>
+</html>
