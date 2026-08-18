@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <%- include('partials/head', { title: 'תוצאות שליחת תזכורות' }) %>
+</head>
+<body>
+  <%- include('partials/nav') %>
+  <main class="container narrow">
+    <div class="page-header">
+      <h1>תוצאות שליחת תזכורות</h1>
+      <a href="/dashboard" class="btn btn-secondary">חזרה למסך הראשי</a>
+    </div>
+
+    <% if (error) { %>
+      <div class="alert alert-error"><%= error %></div>
+    <% } else { %>
+      <section class="card">
+        <p class="alert alert-success">נשלחו בהצלחה <%= results.sent.length %> תזכורות.</p>
+
+        <% if (results.skipped.length > 0) { %>
+          <div class="alert alert-error">
+            <strong><%= results.skipped.length %> עובדים לא קיבלו תזכורת (אין להם כתובת מייל מוגדרת):</strong>
+            <ul>
+              <% results.skipped.forEach(emp => { %>
+                <li><%= emp.firstName %> <%= emp.lastName %></li>
+              <% }) %>
+            </ul>
+          </div>
+        <% } %>
+
+        <% if (results.failed.length > 0) { %>
+          <div class="alert alert-error">
+            <strong><%= results.failed.length %> שליחות נכשלו:</strong>
+            <ul>
+              <% results.failed.forEach(f => { %>
+                <li><%= f.employee.firstName %> <%= f.employee.lastName %> (<%= f.employee.email %>): <%= f.error %></li>
+              <% }) %>
+            </ul>
+          </div>
+        <% } %>
+      </section>
+    <% } %>
+  </main>
+</body>
+</html>

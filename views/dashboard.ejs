@@ -15,6 +15,18 @@
     </div>
 
     <section class="card">
+      <h2>תזכורות מייל חודשיות</h2>
+      <% if (mailConfigured) { %>
+        <p class="empty-state">תזכורת אוטומטית נשלחת לכל עובד עם כתובת מייל מוגדרת, ב-1 לכל חודש בשעה 08:00 (כל עוד השרת רץ באותו הרגע). אפשר גם לשלוח ידנית עכשיו:</p>
+        <form action="/reminders/send-now" method="POST" onsubmit="return confirm('לשלוח תזכורת מייל עכשיו לכל העובדים עם כתובת מייל מוגדרת?');">
+          <button type="submit" class="btn btn-primary">שליחת תזכורות עכשיו</button>
+        </form>
+      <% } else { %>
+        <p class="alert alert-error">שליחת מייל אוטומטית לא הוגדרה. יש להגדיר את משתני הסביבה SMTP_USER ו-SMTP_PASS (ראו README) כדי להפעיל תזכורות חודשיות.</p>
+      <% } %>
+    </section>
+
+    <section class="card">
       <h2>פרטי עובדים ורכבים</h2>
       <% if (employees.length === 0) { %>
         <p class="empty-state">עדיין לא הוגדרו עובדים במערכת. לחצו על "הוספת עובד" כדי להתחיל.</p>

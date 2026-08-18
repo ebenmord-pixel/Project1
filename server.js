@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
@@ -10,6 +12,9 @@ const vehicleCatalog = require('./src/vehicleCatalog');
 const messageLinks = require('./src/messageLinks');
 const { submitReport } = require('./src/reportValidation');
 const excelImport = require('./src/excelImport');
+const mailer = require('./src/mailer');
+const { sendMonthlyReminders } = require('./src/reminderJob');
+const scheduler = require('./src/scheduler');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -76,7 +81,17 @@ app.get('/dashboard', requireLogin, requireRole('officer'), (req, res) => {
     };
   });
   const reports = db.listReportsWithUsers().slice(0, 50);
-  res.render('dashboard', { employees, reports });
+  res.render('dashboard', { employees, reports, mailConfigured: mailer.isConfigured() });
+});
+
+app.post('/reminders/send-now', requireLogin, requireRole('officer'), async (req, res) => {
+  const baseUrl = `${req.protocol}://${req.get('host')}`;
+  try {
+    const results = await sendMonthlyReminders(baseUrl);
+    res.render('reminder-results', { results, error: null });
+  } catch (err) {
+    res.render('reminder-results', { results: null, error: err.message });
+  }
 });
 
 app.get('/employees/new', requireLogin, requireRole('officer'), (req, res) => {
@@ -195,4 +210,5 @@ app.post('/report/:token', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`השרת פועל בכתובת http://localhost:${PORT}`);
+  scheduler.start();
 });
