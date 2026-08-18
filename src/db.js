@@ -1,11 +1,16 @@
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 
 const DB_PATH = path.join(__dirname, '..', 'data', 'db.json');
 
 function emptyDB() {
   return { users: [], reports: [], nextUserId: 1, nextReportId: 1 };
+}
+
+function newReportToken() {
+  return crypto.randomBytes(20).toString('hex');
 }
 
 function readDB() {
@@ -24,7 +29,16 @@ function readDB() {
     writeDB(db);
     return db;
   }
-  return JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
+  const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
+  let changed = false;
+  db.users.forEach(u => {
+    if (u.role === 'employee' && !u.reportToken) {
+      u.reportToken = newReportToken();
+      changed = true;
+    }
+  });
+  if (changed) writeDB(db);
+  return db;
 }
 
 function writeDB(db) {
@@ -42,12 +56,17 @@ function getUserById(id) {
   return db.users.find(u => u.id === Number(id));
 }
 
+function getEmployeeByReportToken(token) {
+  const db = readDB();
+  return db.users.find(u => u.role === 'employee' && u.reportToken === token);
+}
+
 function listEmployees() {
   const db = readDB();
   return db.users.filter(u => u.role === 'employee');
 }
 
-function createEmployee({ firstName, lastName, vehicleNumber, leaseStartDate, username, password }) {
+function createEmployee({ firstName, lastName, vehicleNumber, manufacturer, model, year, leaseStartDate, phone, email, username, password }) {
   const db = readDB();
   if (db.users.some(u => u.username === username)) {
     throw new Error('שם המשתמש כבר קיים במערכת');
@@ -60,14 +79,20 @@ function createEmployee({ firstName, lastName, vehicleNumber, leaseStartDate, us
     firstName,
     lastName,
     vehicleNumber,
-    leaseStartDate
+    manufacturer: manufacturer || '',
+    model: model || '',
+    year: year || '',
+    leaseStartDate,
+    phone: phone || '',
+    email: email || '',
+    reportToken: newReportToken()
   };
   db.users.push(user);
   writeDB(db);
   return user;
 }
 
-function updateEmployee(id, { firstName, lastName, vehicleNumber, leaseStartDate, username, password }) {
+function updateEmployee(id, { firstName, lastName, vehicleNumber, manufacturer, model, year, leaseStartDate, phone, email, username, password }) {
   const db = readDB();
   const user = db.users.find(u => u.id === Number(id) && u.role === 'employee');
   if (!user) throw new Error('העובד לא נמצא');
@@ -77,9 +102,23 @@ function updateEmployee(id, { firstName, lastName, vehicleNumber, leaseStartDate
   user.firstName = firstName;
   user.lastName = lastName;
   user.vehicleNumber = vehicleNumber;
+  user.manufacturer = manufacturer || '';
+  user.model = model || '';
+  user.year = year || '';
   user.leaseStartDate = leaseStartDate;
+  user.phone = phone || '';
+  user.email = email || '';
   if (username) user.username = username;
   if (password) user.passwordHash = bcrypt.hashSync(password, 10);
+  writeDB(db);
+  return user;
+}
+
+function regenerateReportToken(id) {
+  const db = readDB();
+  const user = db.users.find(u => u.id === Number(id) && u.role === 'employee');
+  if (!user) throw new Error('העובד לא נמצא');
+  user.reportToken = newReportToken();
   writeDB(db);
   return user;
 }
@@ -127,9 +166,11 @@ function listReportsWithUsers() {
 module.exports = {
   getUserByUsername,
   getUserById,
+  getEmployeeByReportToken,
   listEmployees,
   createEmployee,
   updateEmployee,
+  regenerateReportToken,
   deleteEmployee,
   addReport,
   listReports,

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <%- include('partials/head', { title: 'ייבוא עובדים מאקסל' }) %>
+</head>
+<body>
+  <%- include('partials/nav') %>
+  <main class="container narrow">
+    <div class="page-header">
+      <h1>ייבוא עובדים מקובץ אקסל</h1>
+      <a href="/dashboard" class="btn btn-secondary">חזרה למסך הראשי</a>
+    </div>
+
+    <section class="card">
+      <p>העלו קובץ אקסל (xlsx) עם רשימת עובדים. העמודות הנדרשות (בשורה הראשונה):</p>
+      <p class="mono">שם פרטי | שם משפחה | מספר רכב | יצרן | דגם | שנת ייצור | תחילת חוזה ליסינג | טלפון | מייל | שם משתמש | סיסמה</p>
+      <p class="empty-state">השדות שם פרטי, שם משפחה, מספר רכב, תחילת חוזה ליסינג, שם משתמש וסיסמה הם חובה. שאר השדות אפשר להשאיר ריקים.</p>
+      <a href="/employees/import/template" class="btn btn-secondary">הורדת קובץ תבנית לדוגמה</a>
+    </section>
+
+    <% if (error) { %>
+      <div class="alert alert-error"><%= error %></div>
+    <% } %>
+
+    <% if (result) { %>
+      <section class="card">
+        <h2>תוצאות הייבוא</h2>
+        <p class="alert alert-success">נוספו בהצלחה <%= result.created %> עובדים.</p>
+        <% if (result.errors.length > 0) { %>
+          <div class="alert alert-error">
+            <strong><%= result.errors.length %> שורות לא יובאו:</strong>
+            <ul>
+              <% result.errors.forEach(e => { %>
+                <li><%= e %></li>
+              <% }) %>
+            </ul>
+          </div>
+        <% } %>
+        <a href="/dashboard" class="btn btn-primary">מעבר למסך הראשי</a>
+      </section>
+    <% } else { %>
+      <form method="POST" action="/employees/import" enctype="multipart/form-data" class="card">
+        <label>קובץ אקסל
+          <input type="file" name="file" accept=".xlsx,.xls" required>
+        </label>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">ייבוא</button>
+        </div>
+      </form>
+    <% } %>
+  </main>
+</body>
+</html>

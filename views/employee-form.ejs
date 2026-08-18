@@ -20,20 +20,76 @@
       <label>מספר רכב
         <input type="text" name="vehicleNumber" value="<%= employee ? employee.vehicleNumber : '' %>" required>
       </label>
+
+      <div class="form-section-title">פרטי רכב (קצין רכב בלבד)</div>
+      <div class="form-row-group">
+        <label>יצרן
+          <select name="manufacturer" id="manufacturer-select">
+            <option value="">— בחירה —</option>
+            <% Object.keys(vehicleCatalog).forEach(mfr => { %>
+              <option value="<%= mfr %>" <%= employee && employee.manufacturer === mfr ? 'selected' : '' %>><%= mfr %></option>
+            <% }) %>
+          </select>
+        </label>
+        <label>דגם
+          <select name="model" id="model-select">
+            <option value="">— בחירה —</option>
+          </select>
+        </label>
+        <label>שנת ייצור
+          <input type="number" name="year" min="1990" max="2100" placeholder="לדוגמה 2023" value="<%= employee ? employee.year : '' %>">
+        </label>
+      </div>
+
       <label>תחילת חוזה ליסינג
         <input type="date" name="leaseStartDate" value="<%= employee ? employee.leaseStartDate : '' %>" required>
       </label>
+
+      <div class="form-section-title">פרטי קשר (לשליחת קישור דיווח)</div>
+      <div class="form-row-group">
+        <label>טלפון נייד (לוואטסאפ)
+          <input type="tel" name="phone" placeholder="050-1234567" value="<%= employee ? employee.phone : '' %>">
+        </label>
+        <label>דוא"ל
+          <input type="email" name="email" placeholder="employee@example.com" value="<%= employee ? employee.email : '' %>">
+        </label>
+      </div>
+
+      <div class="form-section-title">גישה למערכת</div>
       <label>שם משתמש (לכניסה למערכת)
         <input type="text" name="username" value="<%= employee ? employee.username : '' %>" required>
       </label>
       <label>סיסמה <%= employee ? '(השאירו ריק כדי לא לשנות)' : '' %>
         <input type="password" name="password" <%= employee ? '' : 'required' %>>
       </label>
+
       <div class="form-actions">
         <button type="submit" class="btn btn-primary"><%= employee ? 'שמירה' : 'הוספה' %></button>
         <a href="/dashboard" class="btn btn-secondary">ביטול</a>
       </div>
     </form>
   </main>
+
+  <script>
+    const vehicleCatalog = <%- JSON.stringify(vehicleCatalog) %>;
+    const currentModel = <%- JSON.stringify(employee ? (employee.model || '') : '') %>;
+    const manufacturerSelect = document.getElementById('manufacturer-select');
+    const modelSelect = document.getElementById('model-select');
+
+    function populateModels(manufacturer, selected) {
+      modelSelect.innerHTML = '<option value="">— בחירה —</option>';
+      const models = vehicleCatalog[manufacturer] || [];
+      models.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = m;
+        if (m === selected) opt.selected = true;
+        modelSelect.appendChild(opt);
+      });
+    }
+
+    manufacturerSelect.addEventListener('change', () => populateModels(manufacturerSelect.value, ''));
+    if (manufacturerSelect.value) populateModels(manufacturerSelect.value, currentModel);
+  </script>
 </body>
 </html>

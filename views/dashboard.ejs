@@ -5,10 +5,13 @@
 </head>
 <body>
   <%- include('partials/nav') %>
-  <main class="container">
+  <main class="container wide">
     <div class="page-header">
       <h1>מסך ראשי</h1>
-      <a href="/employees/new" class="btn btn-primary">+ הוספת עובד</a>
+      <div class="header-actions">
+        <a href="/employees/import" class="btn btn-secondary">ייבוא מאקסל</a>
+        <a href="/employees/new" class="btn btn-primary">+ הוספת עובד</a>
+      </div>
     </div>
 
     <section class="card">
@@ -23,8 +26,13 @@
                 <th>שם פרטי</th>
                 <th>שם משפחה</th>
                 <th>מספר רכב</th>
+                <th>יצרן ודגם</th>
+                <th>שנת ייצור</th>
                 <th>תחילת חוזה ליסינג</th>
+                <th>טלפון</th>
+                <th>מייל</th>
                 <th>שם משתמש</th>
+                <th>שליחת קישור דיווח</th>
                 <th>פעולות</th>
               </tr>
             </thead>
@@ -34,8 +42,25 @@
                   <td><%= emp.firstName %></td>
                   <td><%= emp.lastName %></td>
                   <td><%= emp.vehicleNumber %></td>
+                  <td><%= [emp.manufacturer, emp.model].filter(Boolean).join(' - ') || '—' %></td>
+                  <td><%= emp.year || '—' %></td>
                   <td><%= emp.leaseStartDate %></td>
+                  <td><%= emp.phone || '—' %></td>
+                  <td><%= emp.email || '—' %></td>
                   <td><%= emp.username %></td>
+                  <td class="actions">
+                    <% if (emp.waLink) { %>
+                      <a href="<%= emp.waLink %>" target="_blank" rel="noopener" title="שליחה בוואטסאפ">📱 וואטסאפ</a>
+                    <% } %>
+                    <% if (emp.mailLink) { %>
+                      <a href="<%= emp.mailLink %>" title="שליחה במייל">✉️ מייל</a>
+                    <% } %>
+                    <button type="button" class="link-btn copy-link-btn" data-link="<%= emp.reportUrl %>">העתקת קישור</button>
+                    <form action="/employees/<%= emp.id %>/regenerate-token" method="POST" class="inline"
+                          onsubmit="return confirm('איפוס הקישור יבטל את הקישור הישן שנשלח בעבר. להמשיך?');">
+                      <button type="submit" class="link-btn">איפוס קישור</button>
+                    </form>
+                  </td>
                   <td class="actions">
                     <a href="/employees/<%= emp.id %>/reports">דיווחים</a>
                     <a href="/employees/<%= emp.id %>/edit">עריכה</a>
@@ -84,5 +109,20 @@
       <% } %>
     </section>
   </main>
+
+  <script>
+    document.querySelectorAll('.copy-link-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(btn.dataset.link);
+          const original = btn.textContent;
+          btn.textContent = 'הועתק!';
+          setTimeout(() => { btn.textContent = original; }, 1500);
+        } catch (e) {
+          prompt('העתיקו את הקישור:', btn.dataset.link);
+        }
+      });
+    });
+  </script>
 </body>
 </html>

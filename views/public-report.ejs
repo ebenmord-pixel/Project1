@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <%- include('partials/head', { title: 'דיווח קילומטראז\'' }) %>
+</head>
+<body class="centered-page">
+  <main class="login-box">
+    <h1>🚗 דיווח קילומטראז'</h1>
+    <p class="subtitle"><%= employee.firstName %> <%= employee.lastName %> · רכב <%= employee.vehicleNumber %></p>
+
+    <% if (submitted) { %>
+      <div class="alert alert-success">הדיווח נקלט בהצלחה, תודה!</div>
+      <p class="empty-state">אפשר לסגור את הדף הזה. בפעם הבאה תוכלו להשתמש שוב באותו קישור.</p>
+    <% } else { %>
+      <% if (error) { %>
+        <div class="alert alert-error"><%= error %></div>
+      <% } %>
+      <form method="POST" action="/report/<%= employee.reportToken %>">
+        <label>תאריך
+          <input type="date" name="reportDate" required>
+        </label>
+        <label>קילומטראז' נוכחי
+          <input type="number" name="mileage" min="0" inputmode="numeric" required autofocus>
+        </label>
+        <button type="submit" class="btn btn-primary btn-block">שליחת דיווח</button>
+      </form>
+    <% } %>
+  </main>
+
+  <script>
+    const dateInput = document.querySelector('input[name="reportDate"]');
+    if (dateInput) {
+      const today = new Date().toISOString().slice(0, 10);
+      dateInput.value = today;
+      dateInput.max = today;
+    }
+  </script>
+</body>
+</html>
