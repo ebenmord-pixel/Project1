@@ -66,10 +66,16 @@ function listEmployees() {
   return db.users.filter(u => u.role === 'employee');
 }
 
-function createEmployee({ firstName, lastName, vehicleNumber, manufacturer, model, year, leaseStartDate, phone, email, username, password }) {
+function createEmployee({ firstName, lastName, employeeNumber, idNumber, vehicleNumber, manufacturer, model, year, leaseStartDate, phone, email, username, password }) {
   const db = readDB();
   if (db.users.some(u => u.username === username)) {
     throw new Error('שם המשתמש כבר קיים במערכת');
+  }
+  if (employeeNumber && db.users.some(u => u.role === 'employee' && u.employeeNumber === employeeNumber)) {
+    throw new Error('מספר עובד זה כבר קיים במערכת');
+  }
+  if (idNumber && db.users.some(u => u.role === 'employee' && u.idNumber === idNumber)) {
+    throw new Error('מספר תעודת זהות זה כבר קיים במערכת');
   }
   const user = {
     id: db.nextUserId++,
@@ -78,6 +84,8 @@ function createEmployee({ firstName, lastName, vehicleNumber, manufacturer, mode
     role: 'employee',
     firstName,
     lastName,
+    employeeNumber: employeeNumber || '',
+    idNumber: idNumber || '',
     vehicleNumber,
     manufacturer: manufacturer || '',
     model: model || '',
@@ -92,15 +100,23 @@ function createEmployee({ firstName, lastName, vehicleNumber, manufacturer, mode
   return user;
 }
 
-function updateEmployee(id, { firstName, lastName, vehicleNumber, manufacturer, model, year, leaseStartDate, phone, email, username, password }) {
+function updateEmployee(id, { firstName, lastName, employeeNumber, idNumber, vehicleNumber, manufacturer, model, year, leaseStartDate, phone, email, username, password }) {
   const db = readDB();
   const user = db.users.find(u => u.id === Number(id) && u.role === 'employee');
   if (!user) throw new Error('העובד לא נמצא');
   if (username && username !== user.username && db.users.some(u => u.username === username)) {
     throw new Error('שם המשתמש כבר קיים במערכת');
   }
+  if (employeeNumber && employeeNumber !== user.employeeNumber && db.users.some(u => u.role === 'employee' && u.employeeNumber === employeeNumber)) {
+    throw new Error('מספר עובד זה כבר קיים במערכת');
+  }
+  if (idNumber && idNumber !== user.idNumber && db.users.some(u => u.role === 'employee' && u.idNumber === idNumber)) {
+    throw new Error('מספר תעודת זהות זה כבר קיים במערכת');
+  }
   user.firstName = firstName;
   user.lastName = lastName;
+  user.employeeNumber = employeeNumber || '';
+  user.idNumber = idNumber || '';
   user.vehicleNumber = vehicleNumber;
   user.manufacturer = manufacturer || '';
   user.model = model || '';

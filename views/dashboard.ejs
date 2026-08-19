@@ -46,6 +46,8 @@
               <tr>
                 <th>שם פרטי</th>
                 <th>שם משפחה</th>
+                <th>מספר עובד</th>
+                <th>ת.ז.</th>
                 <th>מספר רכב</th>
                 <th>יצרן ודגם</th>
                 <th>שנת ייצור</th>
@@ -53,6 +55,7 @@
                 <th>טלפון</th>
                 <th>מייל</th>
                 <th>שם משתמש</th>
+                <th>עדכון קילומטראז' ידני</th>
                 <th>שליחת קישור דיווח</th>
                 <th>פעולות</th>
               </tr>
@@ -62,6 +65,8 @@
                 <tr>
                   <td><%= emp.firstName %></td>
                   <td><%= emp.lastName %></td>
+                  <td><%= emp.employeeNumber %></td>
+                  <td><%= emp.idNumber %></td>
                   <td><%= emp.vehicleNumber %></td>
                   <td><%= [emp.manufacturer, emp.model].filter(Boolean).join(' - ') || '—' %></td>
                   <td><%= emp.year || '—' %></td>
@@ -69,6 +74,14 @@
                   <td><%= emp.phone || '—' %></td>
                   <td><%= emp.email || '—' %></td>
                   <td><%= emp.username %></td>
+                  <td>
+                    <form action="/employees/<%= emp.id %>/reports" method="POST" class="mileage-quick-form">
+                      <input type="hidden" name="returnTo" value="dashboard">
+                      <input type="date" name="reportDate" value="<%= new Date().toISOString().slice(0,10) %>" max="<%= new Date().toISOString().slice(0,10) %>" required>
+                      <input type="number" name="mileage" min="0" step="1" placeholder="<%= emp.lastMileage !== null ? ('אחרון: ' + emp.lastMileage.toLocaleString('he-IL')) : 'קילומטראז\'' %>" required>
+                      <button type="submit" class="btn btn-secondary btn-small">עדכון</button>
+                    </form>
+                  </td>
                   <td class="actions">
                     <% if (emp.waLink) { %>
                       <a href="<%= emp.waLink %>" target="_blank" rel="noopener" title="שליחה בוואטסאפ">📱 וואטסאפ</a>

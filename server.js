@@ -39,8 +39,8 @@ app.use((req, res, next) => {
 });
 
 function employeeFieldsFromBody(body) {
-  const { firstName, lastName, vehicleNumber, manufacturer, model, year, leaseStartDate, phone, email, username, password } = body;
-  return { firstName, lastName, vehicleNumber, manufacturer, model, year, leaseStartDate, phone, email, username, password };
+  const { firstName, lastName, employeeNumber, idNumber, vehicleNumber, manufacturer, model, year, leaseStartDate, phone, email, username, password } = body;
+  return { firstName, lastName, employeeNumber, idNumber, vehicleNumber, manufacturer, model, year, leaseStartDate, phone, email, username, password };
 }
 
 // --- Auth ---
@@ -74,11 +74,13 @@ app.get('/dashboard', requireLogin, requireRole('officer'), (req, res) => {
   const employees = db.listEmployees().map(emp => {
     const reportUrl = `${baseUrl}/report/${emp.reportToken}`;
     const message = `שלום ${emp.firstName}, נא לדווח את קילומטראז' הרכב (${emp.vehicleNumber}) דרך הקישור: ${reportUrl}`;
+    const lastReport = db.lastReportForUser(emp.id);
     return {
       ...emp,
       reportUrl,
       waLink: messageLinks.whatsAppLink(emp.phone, message),
-      mailLink: messageLinks.mailtoLink(emp.email, "דיווח קילומטראז' רכב חברה", message)
+      mailLink: messageLinks.mailtoLink(emp.email, "דיווח קילומטראז' רכב חברה", message),
+      lastMileage: lastReport ? lastReport.mileage : null
     };
   });
   const reports = db.listReportsWithUsers().slice(0, 50);
@@ -102,7 +104,7 @@ app.get('/employees/new', requireLogin, requireRole('officer'), (req, res) => {
 app.post('/employees', requireLogin, requireRole('officer'), (req, res) => {
   const fields = employeeFieldsFromBody(req.body);
   try {
-    if (!fields.firstName || !fields.lastName || !fields.vehicleNumber || !fields.leaseStartDate || !fields.username || !fields.password) {
+    if (!fields.firstName || !fields.lastName || !fields.employeeNumber || !fields.idNumber || !fields.vehicleNumber || !fields.leaseStartDate || !fields.username || !fields.password) {
       throw new Error('יש למלא את כל שדות החובה');
     }
     db.createEmployee(fields);
@@ -173,7 +175,7 @@ app.get('/employees/:id/edit', requireLogin, requireRole('officer'), (req, res) 
 app.post('/employees/:id', requireLogin, requireRole('officer'), (req, res) => {
   const fields = employeeFieldsFromBody(req.body);
   try {
-    if (!fields.firstName || !fields.lastName || !fields.vehicleNumber || !fields.leaseStartDate || !fields.username) {
+    if (!fields.firstName || !fields.lastName || !fields.employeeNumber || !fields.idNumber || !fields.vehicleNumber || !fields.leaseStartDate || !fields.username) {
       throw new Error('יש למלא את כל שדות החובה (למעט סיסמה, אלא אם רוצים לשנות אותה)');
     }
     db.updateEmployee(req.params.id, fields);
@@ -204,8 +206,12 @@ app.get('/employees/:id/reports', requireLogin, requireRole('officer'), (req, re
 app.post('/employees/:id/reports', requireLogin, requireRole('officer'), (req, res) => {
   const employee = db.listEmployees().find(e => e.id === Number(req.params.id));
   if (!employee) return res.status(404).render('error', { message: 'העובד לא נמצא' });
-  const { reportDate, mileage } = req.body;
+  const { reportDate, mileage, returnTo } = req.body;
   const { error } = submitReport({ userId: employee.id, vehicleNumber: employee.vehicleNumber, reportDate, mileage });
+
+  if (!error && returnTo === 'dashboard') {
+    return res.redirect('/dashboard');
+  }
   const reports = db.listReports({ userId: employee.id });
   res.render('employee-reports', { employee, reports, error: error || null });
 });

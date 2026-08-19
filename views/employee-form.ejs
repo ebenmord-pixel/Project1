@@ -17,6 +17,14 @@
       <label>שם משפחה
         <input type="text" name="lastName" value="<%= employee ? employee.lastName : '' %>" required>
       </label>
+      <div class="form-row-group">
+        <label>מספר עובד
+          <input type="text" name="employeeNumber" value="<%= employee ? employee.employeeNumber : '' %>" required>
+        </label>
+        <label>מספר תעודת זהות
+          <input type="text" name="idNumber" value="<%= employee ? employee.idNumber : '' %>" required>
+        </label>
+      </div>
       <label>מספר רכב
         <input type="text" name="vehicleNumber" value="<%= employee ? employee.vehicleNumber : '' %>" required>
       </label>
