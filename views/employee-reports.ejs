@@ -13,6 +13,27 @@
     <section class="card">
       <p><strong>מספר רכב:</strong> <%= employee.vehicleNumber %> &nbsp;|&nbsp;
          <strong>תחילת חוזה ליסינג:</strong> <%= employee.leaseStartDate %></p>
+    </section>
+
+    <section class="card">
+      <h2>עדכון קילומטראז' ידני</h2>
+      <p class="empty-state">אם העובד דיווח לקצין הרכב את הקילומטראז' בדרך אחרת (טלפון, וואטסאפ וכו'), ניתן להזין אותו כאן ידנית.</p>
+      <% if (error) { %>
+        <div class="alert alert-error"><%= error %></div>
+      <% } %>
+      <form method="POST" action="/employees/<%= employee.id %>/reports" class="form-row">
+        <label>תאריך
+          <input type="date" name="reportDate" value="<%= new Date().toISOString().slice(0,10) %>" required>
+        </label>
+        <label>קילומטראז'
+          <input type="number" name="mileage" min="0" step="1" required>
+        </label>
+        <button type="submit" class="btn btn-primary">עדכון</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>היסטוריית דיווחים</h2>
       <% if (reports.length === 0) { %>
         <p class="empty-state">העובד עדיין לא שלח דיווחים.</p>
       <% } else { %>

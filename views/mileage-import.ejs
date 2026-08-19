@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <%- include('partials/head', { title: 'עדכון קילומטראז\' מרוכז' }) %>
+</head>
+<body>
+  <%- include('partials/nav') %>
+  <main class="container narrow">
+    <div class="page-header">
+      <h1>עדכון קילומטראז' מרוכז</h1>
+      <a href="/dashboard" class="btn btn-secondary">חזרה למסך הראשי</a>
+    </div>
+
+    <section class="card">
+      <p>1. הורידו קובץ אקסל עם רשימת העובדים ופרטי הרכב שלהם.</p>
+      <p>2. מלאו לכל עובד את הקילומטראז' שדיווח (בעמודה "קילומטראז'"). מותר להשאיר תא ריק לעובד שעדיין לא דיווח החודש.</p>
+      <p>3. העלו את הקובץ המעודכן בחזרה כדי לעדכן את כל העובדים בבת אחת.</p>
+      <a href="/employees/mileage-export" class="btn btn-secondary">הורדת קובץ עדכון קילומטראז'</a>
+    </section>
+
+    <% if (error) { %>
+      <div class="alert alert-error"><%= error %></div>
+    <% } %>
+
+    <% if (result) { %>
+      <section class="card">
+        <h2>תוצאות העדכון</h2>
+        <p class="alert alert-success">עודכן קילומטראז' עבור <%= result.updated %> עובדים.</p>
+        <% if (result.skipped > 0) { %>
+          <p class="empty-state"><%= result.skipped %> שורות דולגו כי לא הוזן בהן קילומטראז' (העובד כנראה לא דיווח החודש).</p>
+        <% } %>
+        <% if (result.errors.length > 0) { %>
+          <div class="alert alert-error">
+            <strong><%= result.errors.length %> שורות לא עודכנו:</strong>
+            <ul>
+              <% result.errors.forEach(e => { %>
+                <li><%= e %></li>
+              <% }) %>
+            </ul>
+          </div>
+        <% } %>
+        <a href="/dashboard" class="btn btn-primary">מעבר למסך הראשי</a>
+      </section>
+    <% } else { %>
+      <form method="POST" action="/employees/mileage-import" enctype="multipart/form-data" class="card">
+        <label>קובץ אקסל מעודכן
+          <input type="file" name="file" accept=".xlsx,.xls" required>
+        </label>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">עדכון קילומטראז'</button>
+        </div>
+      </form>
+    <% } %>
+  </main>
+</body>
+</html>
