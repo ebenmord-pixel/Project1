@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <%- include('partials/head', { title: 'עדכון קילומטראז\' מאקסל' }) %>
+</head>
+<body>
+  <%- include('partials/nav') %>
+  <main class="container narrow">
+    <div class="page-header">
+      <h1>עדכון קילומטראז' המוני מאקסל</h1>
+      <a href="/dashboard" class="btn btn-secondary">חזרה למסך הראשי</a>
+    </div>
+
+    <section class="card">
+      <p>1. הורידו מהמסך הראשי את קובץ "ייצוא לעדכון קילומטראז'" — הוא מכיל את כל העובדים עם עמודה ריקה למילוי.</p>
+      <p>2. מלאו את העמודה <strong>"קילומטראז' עדכני (למילוי)"</strong> רק לעובדים שדיווחו לכם החודש. </p>
+      <p class="empty-state">אפשר להשאיר תא ריק לעובד שלא שלח קילומטראז' החודש — הוא פשוט ידולג ולא ייחשב לשגיאה. אין לשנות את עמודת "מזהה עובד".</p>
+      <p>3. העלו כאן את הקובץ המעודכן, יחד עם התאריך שאליו מתייחסות הקריאות.</p>
+    </section>
+
+    <% if (error) { %>
+      <div class="alert alert-error"><%= error %></div>
+    <% } %>
+
+    <% if (result) { %>
+      <section class="card">
+        <h2>תוצאות העדכון</h2>
+        <p class="alert alert-success">עודכנו בהצלחה <%= result.updated %> עובדים.</p>
+        <% if (result.skippedEmpty > 0) { %>
+          <p class="empty-state"><%= result.skippedEmpty %> שורות דולגו כי עמודת הקילומטראז' הייתה ריקה (העובד כנראה לא דיווח החודש).</p>
+        <% } %>
+        <% if (result.errors.length > 0) { %>
+          <div class="alert alert-error">
+            <strong><%= result.errors.length %> שורות נכשלו:</strong>
+            <ul>
+              <% result.errors.forEach(e => { %>
+                <li><%= e %></li>
+              <% }) %>
+            </ul>
+          </div>
+        <% } %>
+        <a href="/dashboard" class="btn btn-primary">מעבר למסך הראשי</a>
+      </section>
+    <% } else { %>
+      <form method="POST" action="/employees/mileage-import" enctype="multipart/form-data" class="card">
+        <label>תאריך הקריאה (יוחל על כל השורות שמולאו)
+          <input type="date" name="reportDate" value="<%= new Date().toISOString().slice(0,10) %>" max="<%= new Date().toISOString().slice(0,10) %>" required>
+        </label>
+        <label>קובץ אקסל מעודכן
+          <input type="file" name="file" accept=".xlsx,.xls" required>
+        </label>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">עדכון</button>
+        </div>
+      </form>
+    <% } %>
+  </main>
+</body>
+</html>

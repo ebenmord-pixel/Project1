@@ -12,6 +12,7 @@ const vehicleCatalog = require('./src/vehicleCatalog');
 const messageLinks = require('./src/messageLinks');
 const { submitReport } = require('./src/reportValidation');
 const excelImport = require('./src/excelImport');
+const mileageExcel = require('./src/mileageExcel');
 const mailer = require('./src/mailer');
 const { sendMonthlyReminders } = require('./src/reminderJob');
 const scheduler = require('./src/scheduler');
@@ -135,6 +136,34 @@ app.post('/employees/import', requireLogin, requireRole('officer'), upload.singl
   }
 });
 
+// --- Officer: export employees to Excel for bulk mileage update, then re-import ---
+app.get('/employees/mileage-export', requireLogin, requireRole('officer'), (req, res) => {
+  const buffer = mileageExcel.buildExportBuffer();
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', 'attachment; filename="mileage-update.xlsx"');
+  res.send(buffer);
+});
+
+app.get('/employees/mileage-import', requireLogin, requireRole('officer'), (req, res) => {
+  res.render('mileage-import', { result: null, error: null });
+});
+
+app.post('/employees/mileage-import', requireLogin, requireRole('officer'), upload.single('file'), (req, res) => {
+  if (!req.file) {
+    return res.render('mileage-import', { result: null, error: 'יש לבחור קובץ אקסל' });
+  }
+  const { reportDate } = req.body;
+  if (!reportDate) {
+    return res.render('mileage-import', { result: null, error: 'יש לבחור תאריך לדיווח' });
+  }
+  try {
+    const result = mileageExcel.importMileageFromBuffer(req.file.buffer, reportDate);
+    res.render('mileage-import', { result, error: null });
+  } catch (err) {
+    res.render('mileage-import', { result: null, error: 'שגיאה בקריאת הקובץ: ' + err.message });
+  }
+});
+
 app.get('/employees/:id/edit', requireLogin, requireRole('officer'), (req, res) => {
   const employee = db.listEmployees().find(e => e.id === Number(req.params.id));
   if (!employee) return res.status(404).render('error', { message: 'העובד לא נמצא' });
@@ -169,7 +198,16 @@ app.get('/employees/:id/reports', requireLogin, requireRole('officer'), (req, re
   const employee = db.listEmployees().find(e => e.id === Number(req.params.id));
   if (!employee) return res.status(404).render('error', { message: 'העובד לא נמצא' });
   const reports = db.listReports({ userId: employee.id });
-  res.render('employee-reports', { employee, reports });
+  res.render('employee-reports', { employee, reports, error: null });
+});
+
+app.post('/employees/:id/reports', requireLogin, requireRole('officer'), (req, res) => {
+  const employee = db.listEmployees().find(e => e.id === Number(req.params.id));
+  if (!employee) return res.status(404).render('error', { message: 'העובד לא נמצא' });
+  const { reportDate, mileage } = req.body;
+  const { error } = submitReport({ userId: employee.id, vehicleNumber: employee.vehicleNumber, reportDate, mileage });
+  const reports = db.listReports({ userId: employee.id });
+  res.render('employee-reports', { employee, reports, error: error || null });
 });
 
 // --- Employee: submit + view own reports ---

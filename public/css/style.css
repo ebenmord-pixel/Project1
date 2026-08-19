@@ -215,6 +215,26 @@ tbody tr:hover { background: #f8fafc; }
 
 .btn-block { width: 100%; text-align: center; }
 
+.vehicle-details-box {
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 20px;
+  font-size: 0.88rem;
+}
+
+.vehicle-details-box div {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.vehicle-details-box div:last-child { border-bottom: none; }
+
+.vehicle-details-box span { color: var(--muted); }
+
 .mono {
   font-family: "Courier New", monospace;
   background: #f1f5f9;

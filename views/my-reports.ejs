@@ -10,8 +10,12 @@
 
     <section class="card">
       <h2>פרטי הרכב שלי</h2>
-      <p><strong>מספר רכב:</strong> <%= employee.vehicleNumber %> &nbsp;|&nbsp;
-         <strong>תחילת חוזה ליסינג:</strong> <%= employee.leaseStartDate %></p>
+      <p>
+        <strong>מספר רכב:</strong> <%= employee.vehicleNumber %> &nbsp;|&nbsp;
+        <strong>יצרן ודגם:</strong> <%= [employee.manufacturer, employee.model].filter(Boolean).join(' - ') || '—' %> &nbsp;|&nbsp;
+        <strong>שנת ייצור:</strong> <%= employee.year || '—' %> &nbsp;|&nbsp;
+        <strong>תחילת חוזה ליסינג:</strong> <%= employee.leaseStartDate %>
+      </p>
     </section>
 
     <section class="card">

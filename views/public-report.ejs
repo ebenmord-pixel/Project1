@@ -6,7 +6,13 @@
 <body class="centered-page">
   <main class="login-box">
     <h1>🚗 דיווח קילומטראז'</h1>
-    <p class="subtitle"><%= employee.firstName %> <%= employee.lastName %> · רכב <%= employee.vehicleNumber %></p>
+    <p class="subtitle"><%= employee.firstName %> <%= employee.lastName %></p>
+    <div class="vehicle-details-box">
+      <div><span>מספר רכב</span><strong><%= employee.vehicleNumber %></strong></div>
+      <div><span>יצרן ודגם</span><strong><%= [employee.manufacturer, employee.model].filter(Boolean).join(' - ') || '—' %></strong></div>
+      <div><span>שנת ייצור</span><strong><%= employee.year || '—' %></strong></div>
+      <div><span>תחילת חוזה ליסינג</span><strong><%= employee.leaseStartDate %></strong></div>
+    </div>
 
     <% if (submitted) { %>
       <div class="alert alert-success">הדיווח נקלט בהצלחה, תודה!</div>
